@@ -127,33 +127,22 @@ void read_inputs() {
     speedDecrease = cruiseDecrease.read();
 }
 
+
+/** LOOK HERE!
+ * Your goal is to implement the signalFlashHandler function
+ * The function should set the turn signals and brake lights as appropriate  
+ * Relevant logic :
+ * - brake lights should be on if brakeLightsEnabled or regenActive are true
+ * - turn signals should flash, not be on constantly
+ * - hazards should flash both turn signal lights at the same time
+ * Hints:
+ * - your logic should be controlled by physical buttons, use the global variables like `flashLSignal` or use `DigitalIn` objects at the top of this file
+ * - your logic should control physical lights, look at the `DigitalOut` objects at the top of this file
+ */
 void signalFlashHandler() {
+    
     while (true) {
-        // Note: Casting from a `DigitalOut` to a `bool` gives the most recently written value
-        if(bms_error || contact_12_error) {
-            bms_strobe = !bms_strobe;
-        }
-
-        brake_lights = brakeLightsEnabled || regenActive;
-
-        if (flashHazards) {
-            bool leftTurnSignalState = leftTurnSignal;
-            leftTurnSignal = !leftTurnSignalState;
-            rightTurnSignal = leftTurnSignalState;
-            brake_lights = PIN_OFF;
-        } else if (flashLSignal) {
-            leftTurnSignal = !leftTurnSignal;
-            rightTurnSignal = PIN_OFF;
-            brake_lights = PIN_OFF;
-        } else if (flashRSignal) {
-            leftTurnSignal = left_off;
-            rightTurnSignal = !rightTurnSignal;
-            brake_lights = PIN_OFF;
-        } else {
-            leftTurnSignal = left_off;
-            rightTurnSignal = PIN_OFF;
-            brake_lights = PIN_OFF;
-        }
+        // your code goes here
         ThisThread::sleep_for(FLASH_PERIOD);
     }
 }
