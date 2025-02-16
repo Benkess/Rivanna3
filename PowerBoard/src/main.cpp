@@ -194,12 +194,14 @@ void request_motor_frames() {
 int main() {
     log_set_level(LOG_LEVEL);
 
-    drl.write(PIN_ON);
-    queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
-    queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
-    queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
-    queue.call_every(MOTOR_REQUEST_FRAMES_PERIOD, request_motor_frames);
-    queue.dispatch_forever();
+    while(true) {
+        // AnalogIn throttle_pedal(THROTTLE_WIPER, 5.0f);
+        // AnalogIn brake_pedal(BRAKE_WIPER, 5.0f);
+        // AnalogIn contactor(CONT_12);
+        // AnalogIn aux_battery(AUX);
+        log_error("throttle pedal: %0.3f, brake pedal: %0.3f, contactor: %0.3f, aux battery: %0.3f",
+            throttle_pedal.read(), brake_pedal.read(), contactor.read(), aux_battery.read());
+    }
 }
 
 // DashboardCommands CAN message handler
