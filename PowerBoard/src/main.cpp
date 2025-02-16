@@ -45,6 +45,8 @@ AnalogIn aux_battery(AUX);
 I2C throttle(ACCEL_SDA, ACCEL_SCL);
 I2C regen(REGEN_SDA, REGEN_SCL);
 
+DigitalIn button(NC);
+
 MotorInterface motor_interface(throttle, regen);
 
 PowerCANInterface vehicle_can_interface(MAIN_CAN_RX, MAIN_CAN_TX, MAIN_CAN_STBY);
@@ -194,12 +196,18 @@ void request_motor_frames() {
 int main() {
     log_set_level(LOG_LEVEL);
 
-    drl.write(PIN_ON);
-    queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
-    queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
-    queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
-    queue.call_every(MOTOR_REQUEST_FRAMES_PERIOD, request_motor_frames);
-    queue.dispatch_forever();
+    while(true) {
+        bool is_on = button.read();
+        bms_strobe.write(is_on);
+        brake_lights.write(is_on);
+        right_turn_signal.write(is_on);
+        left_turn_signal.write(is_on);
+        drl.write(is_on);
+        mppt_precharge.write(is_on);
+        charge.write(is_on);
+        motor_precharge.write(is_on);
+        discharge.write(is_on);
+    }
 }
 
 // DashboardCommands CAN message handler
