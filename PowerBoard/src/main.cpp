@@ -194,12 +194,10 @@ void request_motor_frames() {
 int main() {
     log_set_level(LOG_LEVEL);
 
-    drl.write(PIN_ON);
-    queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
-    queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
-    queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
-    queue.call_every(MOTOR_REQUEST_FRAMES_PERIOD, request_motor_frames);
-    queue.dispatch_forever();
+    while(true) {
+        motor_interface.sendThrottle(100);
+        motor_interface.sendRegen(50);
+    }
 }
 
 // DashboardCommands CAN message handler
