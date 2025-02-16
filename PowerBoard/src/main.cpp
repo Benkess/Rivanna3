@@ -45,6 +45,8 @@ AnalogIn aux_battery(AUX);
 I2C throttle(ACCEL_SDA, ACCEL_SCL);
 I2C regen(REGEN_SDA, REGEN_SCL);
 
+DigitalIn button2(NC);
+
 MotorInterface motor_interface(throttle, regen);
 
 PowerCANInterface vehicle_can_interface(MAIN_CAN_RX, MAIN_CAN_TX, MAIN_CAN_STBY);
@@ -195,8 +197,10 @@ int main() {
     log_set_level(LOG_LEVEL);
 
     while(true) {
-        motor_interface.sendThrottle(100);
-        motor_interface.sendRegen(50);
+        if(button2.read()) {
+            motor_interface.sendThrottle(100);
+            motor_interface.sendRegen(50);
+        }
     }
 }
 
