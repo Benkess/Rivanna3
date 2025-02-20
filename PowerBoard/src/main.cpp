@@ -45,7 +45,9 @@ AnalogIn aux_battery(AUX);
 I2C throttle(ACCEL_SDA, ACCEL_SCL);
 I2C regen(REGEN_SDA, REGEN_SCL);
 
-DigitalIn button(NC);
+DigitalIn button(PC_13);
+DigitalOut debug_led(PC_1);
+DigitalOut debug_led_2(PC_0)
 
 MotorInterface motor_interface(throttle, regen);
 
@@ -197,16 +199,22 @@ int main() {
     log_set_level(LOG_LEVEL);
 
     while(true) {
-        bool is_on = button.read();
-        bms_strobe.write(is_on);
-        brake_lights.write(is_on);
-        right_turn_signal.write(is_on);
-        left_turn_signal.write(is_on);
-        drl.write(is_on);
-        mppt_precharge.write(is_on);
-        charge.write(is_on);
-        motor_precharge.write(is_on);
-        discharge.write(is_on);
+        // bool is_on = button.read();
+        ThisThread::sleep_for(500ms);
+        debug_led.write(true);
+        debug_led_2.write(true);
+        ThisThread::sleep_for(500ms);
+        debug_led.write(false);
+        debug_led_2.write(false);
+        // bms_strobe.write(is_on);
+        // brake_lights.write(is_on);
+        // right_turn_signal.write(is_on);
+        // left_turn_signal.write(is_on);
+        // drl.write(is_on);
+        // mppt_precharge.write(is_on);
+        // charge.write(is_on);
+        // motor_precharge.write(is_on);
+        // discharge.write(is_on);
     }
 }
 
