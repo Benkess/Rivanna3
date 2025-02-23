@@ -143,7 +143,46 @@ void signalFlashHandler() {
     
     while (true) {
         // your code goes here
-        ThisThread::sleep_for(FLASH_PERIOD);
+
+        // If (brakeLightsEnabled || regenActive)
+        if(brakeLightsEnabled || regenActive){
+            // Turn on the Brake Lights
+            brake_lights = true;
+        }
+        else {
+            brake_lights = false;
+        }
+
+        // If (hazard)
+        if(flashHazards){
+            // Blink Both left and right
+            leftTurnSignal = true;
+            rightTurnSignal = true;
+            ThisThread::sleep_for(FLASH_PERIOD);
+            leftTurnSignal = false;
+            rightTurnSignal = false;
+            ThisThread::sleep_for(FLASH_PERIOD);
+        }
+        // Else If (right turn)
+        else if(flashRSignal){
+            // Blink Right
+            rightTurnSignal = true;
+            ThisThread::sleep_for(FLASH_PERIOD);
+            rightTurnSignal = false;
+            ThisThread::sleep_for(FLASH_PERIOD);
+        }
+        // Else If (left turn)
+        else if(flashRSignal){
+            // Blink Left
+            leftTurnSignal = true;
+            ThisThread::sleep_for(FLASH_PERIOD);
+            leftTurnSignal = false;
+            ThisThread::sleep_for(FLASH_PERIOD);
+        }
+        else{
+            leftTurnSignal = false;
+            rightTurnSignal = false;
+        }
     }
 }
 
