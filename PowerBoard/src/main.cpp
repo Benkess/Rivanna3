@@ -45,7 +45,7 @@ AnalogIn aux_battery(AUX);
 I2C throttle(ACCEL_SDA, ACCEL_SCL);
 I2C regen(REGEN_SDA, REGEN_SCL);
 
-DigitalIn button2(NC);
+DigitalIn button2(PC_13);
 
 MotorInterface motor_interface(throttle, regen);
 
@@ -195,13 +195,12 @@ void request_motor_frames() {
 // main method
 int main() {
     log_set_level(LOG_LEVEL);
-    bool prev_button = false;
+    bool prev_button = true;
     while(true) {
         bool curr_button = button2.read();
-        if(!prev_button && curr_button) {
+        if(prev_button && !curr_button) {
             motor_interface.sendThrottle(100);
             motor_interface.sendRegen(50);
-
         }
         prev_button = curr_button;
     }
