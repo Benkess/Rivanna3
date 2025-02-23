@@ -195,12 +195,15 @@ void request_motor_frames() {
 // main method
 int main() {
     log_set_level(LOG_LEVEL);
-
+    bool prev_button = false;
     while(true) {
-        if(button2.read()) {
+        bool curr_button = button2.read();
+        if(!prev_button && curr_button) {
             motor_interface.sendThrottle(100);
             motor_interface.sendRegen(50);
+
         }
+        prev_button = curr_button;
     }
 }
 
