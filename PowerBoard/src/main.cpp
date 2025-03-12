@@ -37,6 +37,9 @@ DigitalOut charge(CHARGE_EN);
 DigitalOut motor_precharge(MTR_PRE_EN);
 DigitalOut discharge(DIS_CHARGE_EN);
 
+DigitalIn debug_btn(DEBUG_BTN);
+DigitalOut debug_led(DEBUG_LED_1);
+
 AnalogIn throttle_pedal(THROTTLE_WIPER, 5.0f);
 AnalogIn brake_pedal(BRAKE_WIPER, 5.0f);
 AnalogIn contactor(CONT_12);
@@ -181,12 +184,23 @@ void fault_occurred() {
 int main() {
     log_set_level(LOG_LEVEL);
 
-    drl.write(PIN_ON); // the digital running light is always on
-    queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
-    queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
-    queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
-    queue.call_every(MOTOR_REQUEST_FRAMES_PERIOD, request_motor_frames);
-    queue.dispatch_forever();
+    // test code
+    uint8_t count = 1;
+
+    while (true) {
+        if (debug_btn.read()) {
+            log_error("Byte sent: %d", count);
+            count++;
+            debug_led.write(true);
+            motor_interface.sendThrottle(count);
+            motor_interface.sendRegen(count);
+        }
+        else {
+            debug_led.write(false);
+        }
+        ThisThread::sleep_for(1s); // you will need to hold the button down
+    }
+    
 }
 
 // DashboardCommands CAN message handler
