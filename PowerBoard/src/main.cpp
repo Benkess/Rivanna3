@@ -1,4 +1,3 @@
-// #include "ECUCANStructs.h"
 #include "PowerCANInterface.h"
 #include "Printing.h"
 #include "ThisThread.h"
@@ -12,6 +11,7 @@
 #include "main.h"
 #include "MotorCommandsCANStruct.h"
 #include "MotorControllerCANInterface.h"
+#include "HeartBeatSystem.h"
 #include "CruiseControl.h"
 
 #define LOG_LEVEL                       LOG_DEBUG
@@ -60,11 +60,11 @@ bool contact_12_error = false; //TODO currently does nothing
 bool has_faulted = false; // true if there is any fault that locks the car until reset
 bool regen_enabled = false;
 bool cruise_control_enabled = false;
-
 bool cruise_control_brake_latch = false;
 
 CruiseControl cruise_control;
 
+HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
 
 /**
  * Function that handles the flashing of the turn signals and hazard lights.
@@ -180,9 +180,16 @@ void fault_occurred() {
     set_motor_status();
 }
 
+// Function that when called creates and sends a Heartbeat can message from PowerBoard
+void send_powerboard_heartbeat() {
+    HeartBeat power_board_hb = heartbeatSystem.send_heartbeat();
+    vehicle_can_interface.send(&power_board_hb);
+}
+
 // main method
 int main() {
     log_set_level(LOG_LEVEL);
+    log_info("PowerBoard starting up");
 
     // test code
     uint8_t count = 1;
@@ -202,6 +209,8 @@ int main() {
     }
     
 }
+
+// CAN Message handlers
 
 // DashboardCommands CAN message handler
 void PowerCANInterface::handle(DashboardCommands *can_struct){
@@ -226,7 +235,10 @@ void PowerCANInterface::handle(DashboardCommands *can_struct){
     queue.call(set_motor_status);
 }
 
-// CAN Message handlers
+// Handle heartbeat message
+void PowerCANInterface::handle(HeartBeat *can_struct){
+    heartbeatSystem.refreshTimer(can_struct);
+}
 
 // Message_forwarder is called whenever the MotorControllerCANInterface gets a CAN message.
 // This forwards the message to the vehicle can bus.
