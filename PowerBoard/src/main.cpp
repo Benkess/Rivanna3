@@ -27,6 +27,8 @@ EventQueue queue(32 * EVENTS_EVENT_SIZE);
 constexpr bool PIN_ON = true;
 constexpr bool PIN_OFF = false;
 
+DigitalOut led(DEBUG_LED_2);
+
 DigitalOut bms_strobe(STROBE_EN);
 DigitalOut brake_lights(BRAKE_LIGHT_EN);
 DigitalOut right_turn_signal(RIGHT_TURN_EN);
@@ -59,9 +61,9 @@ bool regen_enabled = false;
 bool cruise_control_enabled = false;
 bool cruise_control_brake_latch = false;
 
-// CruiseControl cruise_control;
+CruiseControl cruise_control;
 
-// HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
+HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
 
 /**
  * Function that handles the flashing of the turn signals and hazard lights.
@@ -137,7 +139,7 @@ void set_motor_status() {
         motor_CAN_struct.braking = true;
     } else if (cruise_control_enabled && !cruise_control_brake_latch) { // cruise control case, logic handled elsewhere
         // TODO: get throttle
-        // motor_CAN_struct.cruise_speed = motor_CAN_struct.cruise_drive ? cruise_control.get_cruise_target() : 0;
+        motor_CAN_struct.cruise_speed = motor_CAN_struct.cruise_drive ? cruise_control.get_cruise_target() : 0;
         motor_CAN_struct.cruise_drive = true;
     } else if(regen_enabled) { // regen drive case
         regen_drive(&motor_CAN_struct, &throttle, &regen);
@@ -179,7 +181,7 @@ void fault_occurred() {
 
 // Function that when called creates and sends a Heartbeat can message from PowerBoard
 void send_powerboard_heartbeat() {
-    // HeartBeat power_board_hb = heartbeatSystem.send_heartbeat();
+    HeartBeat power_board_hb = heartbeatSystem.send_heartbeat();
     // vehicle_can_interface.send(&power_board_hb);
 }
 
@@ -189,12 +191,12 @@ int main() {
     log_info("PowerBoard starting up");
 
     while(true) {
-        // AnalogIn throttle_pedal(THROTTLE_WIPER, 5.0f);
-        // AnalogIn brake_pedal(BRAKE_WIPER, 5.0f);
-        // AnalogIn contactor(CONT_12);
-        // AnalogIn aux_battery(AUX);
-        log_error("throttle pedal: %0.3f, brake pedal: %0.3f, contactor: %0.3f, aux battery: %0.3f",
-            throttle_pedal.read(), brake_pedal.read(), contactor.read(), aux_battery.read());
+        led.write(PIN_ON);
+        float voltage = throttle_pedal.read();
+        int val = int(voltage * 1000);
+        ThisThread::sleep_for(val);
+        led.write(PIN_OFF);
+        ThisThread::sleep_for(1s);
     }
 }
 
@@ -213,19 +215,19 @@ void PowerCANInterface::handle(DashboardCommands *can_struct){
 
     cruise_control_enabled = can_struct->cruise_en;
 
-    // if(can_struct->cruise_inc) {
-    //     cruise_control.increase_cruise_target();
-    // }
-    // if(can_struct->cruise_dec) {
-    //     cruise_control.decrease_cruise_target();
-    // }
+    if(can_struct->cruise_inc) {
+        cruise_control.increase_cruise_target();
+    }
+    if(can_struct->cruise_dec) {
+        cruise_control.decrease_cruise_target();
+    }
     
     queue.call(set_motor_status);
 }
 
 // Handle heartbeat message
 void PowerCANInterface::handle(HeartBeat *can_struct){
-    // heartbeatSystem.refreshTimer(can_struct);
+    heartbeatSystem.refreshTimer(can_struct);
 }
 
 // Message_forwarder is called whenever the MotorControllerCANInterface gets a CAN message.
@@ -236,7 +238,7 @@ void MotorControllerCANInterface::message_forwarder(CANMessage *message) {
 
 void MotorControllerCANInterface::handle(MotorControllerPowerStatus *can_struct) {
     uint16_t motor_rpm = can_struct->motor_rpm;
-    // cruise_control.send_cruise_control_to_motor(motor_rpm);
+    cruise_control.send_cruise_control_to_motor(motor_rpm);
 }
 
 void MotorControllerCANInterface::handle(MotorControllerDriveStatus *can_struct) {
