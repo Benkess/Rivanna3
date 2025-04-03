@@ -193,7 +193,7 @@ int main() {
 
     // test code
     while (true) {
-        if (debug_btn.read()) {
+        if (!debug_btn.read()) {
             log_error("Button pressed");
             debug_led.write(true);
             motor_interface.sendThrottle(256);
