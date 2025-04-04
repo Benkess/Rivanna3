@@ -152,8 +152,8 @@ void set_motor_status() {
         motor_CAN_struct.manual_drive = true;
     }
 
-    motor_interface.sendThrottle(throttle);
-    motor_interface.sendRegen(regen);
+    // motor_interface.sendThrottle(throttle);
+    // motor_interface.sendRegen(regen);
 
     vehicle_can_interface.send(&motor_CAN_struct);
 }
@@ -193,16 +193,20 @@ int main() {
 
     // test code
     while (true) {
+        uint8_t count = 0;
         if (debug_btn.read()) {
             log_error("Button pressed");
             debug_led.write(true);
-            motor_interface.sendThrottle(256);
+            count++;
         }
         else {
             log_error("Button not pressed");
             debug_led.write(false);
-            motor_interface.sendThrottle(0);
         }
+        if (count > 256)
+            count = 0;
+        motor_interface.sendThrottle(count);
+        motor_interface.sendRegen(count);
         ThisThread::sleep_for(100ms);
     }
     
