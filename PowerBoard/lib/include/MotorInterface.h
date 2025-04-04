@@ -3,7 +3,8 @@
 
 #include <mbed.h>
 
-static constexpr int THROTTLE_REGEN_I2C_ADDRESS = 0b0101;
+#define THROTTLE_ADR    (0b0101111 << 1)
+#define REGEN_ADR       (0b0101110 << 1)
 
 class MotorInterface {
 

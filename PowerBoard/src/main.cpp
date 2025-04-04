@@ -39,6 +39,7 @@ DigitalOut discharge(DIS_CHARGE_EN);
 
 DigitalIn debug_btn(DEBUG_BTN);
 DigitalOut debug_led(DEBUG_LED_1);
+DigitalOut debug_led_2(DEBUG_LED_2);
 
 AnalogIn throttle_pedal(THROTTLE_WIPER, 5.0f);
 AnalogIn brake_pedal(BRAKE_WIPER, 5.0f);
@@ -205,9 +206,12 @@ int main() {
         }
         if (count > 256)
             count = 0;
-        motor_interface.sendThrottle(count);
-        motor_interface.sendRegen(count);
-        ThisThread::sleep_for(100ms);
+        if (motor_interface.sendThrottle(count))
+            debug_led_2 = !debug_led_2;
+        ThisThread::sleep_for(50ms);
+        if (motor_interface.sendRegen(count))
+            debug_led_2 = !debug_led_2;
+        ThisThread::sleep_for(50ms);
     }
     
 }
