@@ -29,8 +29,10 @@ int MotorInterface::sendThrottle(uint16_t throttle) {
 int MotorInterface::sendRegen(uint16_t regen) {
     uint16_t updated_regen = 0x100 - regen;
     char cmd[2];
-    cmd[0] = (updated_regen & 0x100) >> 8;
-    cmd[1] = updated_regen & 0xFF;
+    // cmd[0] = (updated_regen & 0x100) >> 8;
+    // cmd[1] = updated_regen & 0xFF;
+    cmd[0] = 0x00;
+    cmd[1] = 0x40;
     int result = bus.write(REGEN_ADR, cmd, 2);
     return result;
 }

@@ -71,19 +71,20 @@ HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
 void signal_flash_handler() {
     if (bms_error || contact_12_error) {
         bms_strobe.write(!bms_strobe.read());
+        left_turn_signal.write(bms_strobe.read());
     }
 
     if (flashHazards || has_faulted) {
-        left_turn_signal.write(!left_turn_signal.read());
+        // left_turn_signal.write(!left_turn_signal.read());
         right_turn_signal.write(left_turn_signal.read());
     } else if (flashLeftTurnSignal) {
-        left_turn_signal.write(!left_turn_signal.read());
+        // left_turn_signal.write(!left_turn_signal.read());
         right_turn_signal.write(PIN_OFF);
     } else if (flashRightTurnSignal) {
         right_turn_signal.write(!right_turn_signal.read());
-        left_turn_signal.write(PIN_OFF);
+        // left_turn_signal.write(PIN_OFF);
     } else {
-        left_turn_signal.write(PIN_OFF);
+        // left_turn_signal.write(PIN_OFF);
         right_turn_signal.write(PIN_OFF);
     }
 }
