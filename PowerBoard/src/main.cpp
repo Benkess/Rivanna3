@@ -194,22 +194,21 @@ int main() {
 
     // test code
     while (true) {
-        uint8_t count = 0;
-        if (debug_btn.read()) {
+        uint16_t val;
+        if (!debug_btn.read()) {
             log_error("Button pressed");
             debug_led.write(true);
-            count++;
+            val = 0x40;
         }
         else {
             log_error("Button not pressed");
             debug_led.write(false);
+            val = 0xC0;
         }
-        if (count > 256)
-            count = 0;
-        if (motor_interface.sendThrottle(count))
+        if (motor_interface.sendThrottle(val))
             debug_led_2 = !debug_led_2;
         ThisThread::sleep_for(50ms);
-        if (motor_interface.sendRegen(count))
+        if (motor_interface.sendRegen(val))
             debug_led_2 = !debug_led_2;
         ThisThread::sleep_for(50ms);
     }
