@@ -3,6 +3,7 @@
 #include "log.h"
 #include "MotorCommandsCANStruct.h"
 #include "HeartBeatCANStruct.h"
+#include "main.h"
 
 TelemetryCANInterface::TelemetryCANInterface(PinName rd, PinName td,
                                      PinName standby_pin)
@@ -24,6 +25,8 @@ void TelemetryCANInterface::message_handler() {
             log_debug(
                 "Received CAN message with ID 0x%03X Length %d Data 0x%s ",
                 message.id, message.len, message_data);
+                
+            led.write(!led.read()); // Toggle the LED state
         }
     }
 }

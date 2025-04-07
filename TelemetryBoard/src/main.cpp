@@ -6,6 +6,7 @@
 #include <mbed.h>
 #include <rtos.h>
 
+DigitalOut led(PC_13);
 
 int main() {
     TelemetryCANInterface can_interface(PA_11, PA_12, PA_10);
