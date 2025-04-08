@@ -3,7 +3,8 @@
 #include "log.h"
 #include "MotorCommandsCANStruct.h"
 #include "HeartBeatCANStruct.h"
-
+#include "pindef.h"
+DigitalOut debug_led_2(DEBUG_LED_2);
 PowerCANInterface::PowerCANInterface(PinName rd, PinName td,
                                      PinName standby_pin)
     : CANInterface(rd, td, standby_pin) {
@@ -64,6 +65,10 @@ void PowerCANInterface::message_handler() {
             log_debug(
                 "Received CAN message with ID 0x%03X Length %d Data 0x%s ",
                 message.id, message.len, message_data);
+            
+            if(message.id == BPSError_MESSAGE_ID || message.id == BPSPackInformation_MESSAGE_ID || message.id == BPSCellVoltage_MESSAGE_ID || message.id == BPSCellTemperature_MESSAGE_ID) {
+                debug_led_2.write(!debug_led_2.read());
+            }
             if (message.id == BPSError_MESSAGE_ID) {
                 BPSError can_struct;
                 can_struct.deserialize(&message);
