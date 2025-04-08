@@ -59,9 +59,9 @@ bool regen_enabled = false;
 bool cruise_control_enabled = false;
 bool cruise_control_brake_latch = false;
 
-CruiseControl cruise_control;
+// CruiseControl cruise_control;
 
-HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
+// HeartBeatSystem heartbeatSystem(fault_occurred, &queue, HB_POWER_BOARD);
 
 /**
  * Function that handles the flashing of the turn signals and hazard lights.
@@ -93,21 +93,21 @@ void signal_flash_handler() {
 /**
  * Sets the throttle and regen values of the motor based on the regen and throttle formula
  */
-void regen_drive(MotorCommands *motor_CAN_struct, uint16_t* throttleValue, uint16_t* regenValue) {
-    uint16_t pedalValue = *throttleValue;
+// void regen_drive(MotorCommands *motor_CAN_struct, uint16_t* throttleValue, uint16_t* regenValue) {
+//     uint16_t pedalValue = *throttleValue;
 
-    if (pedalValue <= 50) {
-        *throttleValue = 0;
-        *regenValue = 79.159 * pow(50 - pedalValue, 0.3);
-        motor_CAN_struct->braking = true;
-    } else if (pedalValue < 100) {
-        *throttleValue = 0;
-        *regenValue = 0;
-    } else {
-        *throttleValue = -56.27610464 * pow(156 - (pedalValue - 100), 0.3) + 256;
-        *regenValue = 0;
-    }
-}
+//     if (pedalValue <= 50) {
+//         *throttleValue = 0;
+//         *regenValue = 79.159 * pow(50 - pedalValue, 0.3);
+//         motor_CAN_struct->braking = true;
+//     } else if (pedalValue < 100) {
+//         *throttleValue = 0;
+//         *regenValue = 0;
+//     } else {
+//         *throttleValue = -56.27610464 * pow(156 - (pedalValue - 100), 0.3) + 256;
+//         *regenValue = 0;
+//     }
+// }
 
 
 /**
@@ -136,15 +136,15 @@ void set_motor_status() {
         }
         cruise_control_brake_latch = true;
         motor_CAN_struct.braking = true;
-    } else if (cruise_control_enabled && !cruise_control_brake_latch) { // cruise control case, logic handled elsewhere
-        // TODO: get throttle
-        motor_CAN_struct.cruise_speed = motor_CAN_struct.cruise_drive ? cruise_control.get_cruise_target() : 0;
-        motor_CAN_struct.cruise_drive = true;
-    } else if(regen_enabled) { // regen drive case
-        regen_drive(&motor_CAN_struct, &throttle, &regen);
-        motor_CAN_struct.throttle = throttle;
-        motor_CAN_struct.regen_braking = regen;
-        motor_CAN_struct.regen_drive = true;
+    // } else if (cruise_control_enabled && !cruise_control_brake_latch) { // cruise control case, logic handled elsewhere
+    //     // TODO: get throttle
+    //     motor_CAN_struct.cruise_speed = motor_CAN_struct.cruise_drive ? cruise_control.get_cruise_target() : 0;
+    //     motor_CAN_struct.cruise_drive = true;
+    // } else if(regen_enabled) { // regen drive case
+    //     regen_drive(&motor_CAN_struct, &throttle, &regen);
+    //     motor_CAN_struct.throttle = throttle;
+    //     motor_CAN_struct.regen_braking = regen;
+    //     motor_CAN_struct.regen_drive = true;
     } else { // normal drive case
         // do nothing; throttle, brake, and regen are already set
         motor_CAN_struct.manual_drive = true;
@@ -179,10 +179,10 @@ void fault_occurred() {
 }
 
 // Function that when called creates and sends a Heartbeat can message from PowerBoard
-void send_powerboard_heartbeat() {
-    HeartBeat power_board_hb = heartbeatSystem.send_heartbeat();
-    vehicle_can_interface.send(&power_board_hb);
-}
+// void send_powerboard_heartbeat() {
+//     HeartBeat power_board_hb = heartbeatSystem.send_heartbeat();
+//     vehicle_can_interface.send(&power_board_hb);
+// }
 
 // main method
 int main() {
@@ -191,8 +191,8 @@ int main() {
 
     drl.write(PIN_ON); // the digital running light is always on
 
-    heartbeatSystem.initializeTimeouts(false, false, false); // set initial heartbeat timer (Call handle_powerborad_timeout in 100ms)
-    queue.call_every(50ms, send_powerboard_heartbeat); // Send powerboard heartbeat out every 50 ms
+    // heartbeatSystem.initializeTimeouts(false, false, false); // set initial heartbeat timer (Call handle_powerborad_timeout in 100ms)
+    // queue.call_every(50ms, send_powerboard_heartbeat); // Send powerboard heartbeat out every 50 ms
 
     queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
     queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
@@ -216,19 +216,19 @@ void PowerCANInterface::handle(DashboardCommands *can_struct){
 
     cruise_control_enabled = can_struct->cruise_en;
 
-    if(can_struct->cruise_inc) {
-        cruise_control.increase_cruise_target();
-    }
-    if(can_struct->cruise_dec) {
-        cruise_control.decrease_cruise_target();
-    }
+    // if(can_struct->cruise_inc) {
+    //     cruise_control.increase_cruise_target();
+    // }
+    // if(can_struct->cruise_dec) {
+    //     cruise_control.decrease_cruise_target();
+    // }
     
     queue.call(set_motor_status);
 }
 
 // Handle heartbeat message
 void PowerCANInterface::handle(HeartBeat *can_struct){
-    heartbeatSystem.refreshTimer(can_struct);
+    // heartbeatSystem.refreshTimer(can_struct);
 }
 
 // Message_forwarder is called whenever the MotorControllerCANInterface gets a CAN message.
@@ -239,7 +239,7 @@ void MotorControllerCANInterface::message_forwarder(CANMessage *message) {
 
 void MotorControllerCANInterface::handle(MotorControllerPowerStatus *can_struct) {
     uint16_t motor_rpm = can_struct->motor_rpm;
-    cruise_control.send_cruise_control_to_motor(motor_rpm);
+    // cruise_control.send_cruise_control_to_motor(motor_rpm);
 }
 
 void MotorControllerCANInterface::handle(MotorControllerDriveStatus *can_struct) {
