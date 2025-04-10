@@ -68,26 +68,26 @@ bool cruise_control_brake_latch = false;
  * Uses values of global control variables for logic.
  * Writes directly to the DigitalOut pins for the left and right turn signals.
  */
-void signal_flash_handler() {
-    if (bms_error || contact_12_error) {
-        bms_strobe.write(!bms_strobe.read());
-        left_turn_signal.write(bms_strobe.read());
-    }
+// void signal_flash_handler() {
+//     if (bms_error || contact_12_error) {
+//         bms_strobe.write(!bms_strobe.read());
+//         left_turn_signal.write(bms_strobe.read());
+//     }
 
-    if (flashHazards || has_faulted) {
-        // left_turn_signal.write(!left_turn_signal.read());
-        right_turn_signal.write(left_turn_signal.read());
-    } else if (flashLeftTurnSignal) {
-        // left_turn_signal.write(!left_turn_signal.read());
-        right_turn_signal.write(PIN_OFF);
-    } else if (flashRightTurnSignal) {
-        right_turn_signal.write(!right_turn_signal.read());
-        // left_turn_signal.write(PIN_OFF);
-    } else {
-        // left_turn_signal.write(PIN_OFF);
-        right_turn_signal.write(PIN_OFF);
-    }
-}
+//     if (flashHazards || has_faulted) {
+//         // left_turn_signal.write(!left_turn_signal.read());
+//         right_turn_signal.write(left_turn_signal.read());
+//     } else if (flashLeftTurnSignal) {
+//         // left_turn_signal.write(!left_turn_signal.read());
+//         right_turn_signal.write(PIN_OFF);
+//     } else if (flashRightTurnSignal) {
+//         right_turn_signal.write(!right_turn_signal.read());
+//         // left_turn_signal.write(PIN_OFF);
+//     } else {
+//         // left_turn_signal.write(PIN_OFF);
+//         right_turn_signal.write(PIN_OFF);
+//     }
+// }
 
 
 /**
@@ -161,10 +161,10 @@ void set_motor_status() {
  * Function that sets the brake lights based on the brake pedal value.
  * If the brake pedal is pressed, or regen is enabled and actively regenerative braking, the brake lights are enabled, disabled otherwise
  */
-void set_brake_lights(){
-    bool brakeLightsEnable = read_brake() > 0 || (regen_enabled && read_throttle() <= 50);
-    brake_lights.write(brakeLightsEnable);
-}
+// void set_brake_lights(){
+//     bool brakeLightsEnable = read_brake() > 0 || (regen_enabled && read_throttle() <= 50);
+//     brake_lights.write(brakeLightsEnable);
+// }
 
 // request new data from the motor
 void request_motor_frames() {
@@ -195,8 +195,8 @@ int main() {
     // queue.call_every(50ms, send_powerboard_heartbeat); // Send powerboard heartbeat out every 50 ms
 
     queue.call_every(MOTOR_CONTROL_PERIOD, set_motor_status);
-    queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
-    queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
+    // queue.call_every(SIGNAL_FLASH_PERIOD, signal_flash_handler);
+    // queue.call_every(BRAKE_LIGHTS_UPDATE_PERIOD, set_brake_lights);
     queue.call_every(MOTOR_REQUEST_FRAMES_PERIOD, request_motor_frames);
     queue.dispatch_forever();
 }
