@@ -12,6 +12,7 @@
 class TelemetryCANInterface : public CANInterface {
   public:
     TelemetryCANInterface(PinName rd, PinName td, PinName standby_pin);
+    int send_message(CANMessage *message);
 
   private:
     void message_handler() override;
