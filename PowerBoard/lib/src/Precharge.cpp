@@ -10,6 +10,7 @@
 #define HAL_EFFECT_SENSOR_SCALE     (5.0f / 3.28f) // used to scale voltages up to 5V
 #define PACK_VOLT_PCT               0.95f // precharge can proceed once RC voltage exceeds this percent of pack voltage
 #define PRECHARGE_WAIT              3s
+#define HAL_EFFECT_SENSOR_STARTUP   250ms // time to wait for the hal effect sensor to stabilize
 
 
 // checks if a fault occured
@@ -29,6 +30,8 @@ void fault_trap(){
 void motor_precharge(){
     log_debug("Motor precharge starting");
 
+    ThisThread::sleep_for(HAL_EFFECT_SENSOR_STARTUP);
+
     while (cont_12.read() < CONT_12_LOGIC_THRESHOLD || !discharge_relay_status){
         ThisThread::sleep_for(SLEEP_TICK);
     }
@@ -38,12 +41,12 @@ void motor_precharge(){
     motor_precharge_en.write(1);
 
     // invert rc voltage
-    // while (pack_voltage == 0 && rc_voltage_motor.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
-    //     ThisThread::sleep_for(SLEEP_TICK);
-    //     fault_trap();
-    // }
+    while (pack_voltage == 0 || rc_voltage_motor.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
+        ThisThread::sleep_for(SLEEP_TICK);
+        fault_trap();
+    }
 
-    ThisThread::sleep_for(PRECHARGE_WAIT);
+    // ThisThread::sleep_for(PRECHARGE_WAIT);
 
     discharge_en.write(1);
 
@@ -69,6 +72,8 @@ void motor_precharge(){
 void mppt_precharge(){
     log_debug("MPPT precharge starting");
 
+    ThisThread::sleep_for(HAL_EFFECT_SENSOR_STARTUP);
+
     while(cont_12.read() < CONT_12_LOGIC_THRESHOLD || !charge_relay_status){
         ThisThread::sleep_for(SLEEP_TICK);
     }
@@ -77,12 +82,12 @@ void mppt_precharge(){
     // start motor precharge
     mppt_precharge_en.write(1);
 
-    // while (pack_voltage == 0 && rc_voltage_battery.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
-    //     ThisThread::sleep_for(SLEEP_TICK);
-    //     fault_trap();
-    // }
+    while (pack_voltage == 0 || rc_voltage_battery.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
+        ThisThread::sleep_for(SLEEP_TICK);
+        fault_trap();
+    }
 
-    ThisThread::sleep_for(PRECHARGE_WAIT);
+    // ThisThread::sleep_for(PRECHARGE_WAIT);
 
     charge_en.write(1);
 
