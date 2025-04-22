@@ -46,13 +46,17 @@ void motor_precharge(){
         fault_trap();
     }
 
+    //2.7 Volts || 1.5 seconds then stop precharge
+    // while (rc_voltage_motor.read_voltage() < 2.7 || )
     // ThisThread::sleep_for(PRECHARGE_WAIT);
 
     discharge_en.write(1);
 
+    //Sleep duration is 2500ms
     uint32_t count = PRECHARGE_CHARGING / SLEEP_TICK;
     for (int i = 0; i < count; i++) {
         ThisThread::sleep_for(SLEEP_TICK);
+        
         fault_trap();
     }
 
