@@ -56,7 +56,7 @@ void motor_precharge(){
     uint32_t count = PRECHARGE_CHARGING / SLEEP_TICK;
     for (int i = 0; i < count; i++) {
         ThisThread::sleep_for(SLEEP_TICK);
-        
+        log_debug(rc_voltage_motor.read_voltage());
         fault_trap();
     }
 
