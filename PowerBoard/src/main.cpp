@@ -173,9 +173,9 @@ void request_motor_frames() {
 
 // call when a fault occurs
 void fault_occurred() {
-    log_error("A fault occurred! Now putting the car in a safe state.");
-    has_faulted = true;
-    set_motor_status();
+    // log_error("A fault occurred! Now putting the car in a safe state.");
+    // has_faulted = true;
+    // set_motor_status();
 }
 
 // Function that when called creates and sends a Heartbeat can message from PowerBoard
