@@ -194,6 +194,26 @@ void send_powerboard_heartbeat() {
     vehicle_can_interface.send(&power_board_hb);
 }
 
+// Enables charging mode, disabling all non-essential systems, function does not return
+void enter_charging_mode() {
+    // motor off (HV should already be off anyways)
+    motor_interface.sendThrottle(0);
+    motor_interface.sendRegen(0);
+
+    // turn off all lights
+    left_turn_signal.write(PIN_OFF);
+    right_turn_signal.write(PIN_OFF);
+    drl.write(PIN_OFF);
+    bms_strobe.write(PIN_OFF);
+    brake_lights.write(PIN_OFF);
+
+    // freeze the event queue
+    queue.break_dispatch();
+
+    // freeze CAN receiver thread by blocking this function call
+    while(true) {ThisThread::sleep_for(0xFFFFFFFFms);}
+}
+
 // main method
 int main() {
     log_set_level(LOG_LEVEL);
@@ -215,6 +235,7 @@ int main() {
     mppt_precharge_thread.start(mppt_precharge);
 
     queue.dispatch_forever();
+    while(true) {ThisThread::sleep_for(0xFFFFFFFFms);} // sleep forever if the queue is disabled by charging mode
 }
 
 // CAN Message handlers
