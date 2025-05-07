@@ -4,6 +4,7 @@
 #include "MotorCommandsCANStruct.h"
 #include "HeartBeatCANStruct.h"
 #include "BPSCANStructs.h"
+#include "ChargingModeCANStruct.h"
 
 
 PowerCANInterface::PowerCANInterface(PinName rd, PinName td,
@@ -84,6 +85,11 @@ void PowerCANInterface::message_handler() {
             }
             else if (message.id == BPSPackInformation_MESSAGE_ID) {
                 BPSPackInformation can_struct;
+                can_struct.deserialize(&message);
+                handle(&can_struct);
+            }
+            else if (message.id == CHARGING_MODE_ID) {
+                ChargingMode can_struct;
                 can_struct.deserialize(&message);
                 handle(&can_struct);
             }

@@ -15,6 +15,7 @@
 #include "CruiseControl.h"
 #include "Precharge.h"
 #include "AUXBattery.h"
+#include "ChargingModeCANStruct.h"
 
 
 #define LOG_LEVEL                       LOG_DEBUG
@@ -199,18 +200,15 @@ void enter_charging_mode() {
     // motor off (HV should already be off anyways)
     motor_interface.sendThrottle(0);
     motor_interface.sendRegen(0);
+    cruise_control_enabled = false;
 
     // turn off all lights
     left_turn_signal.write(PIN_OFF);
     right_turn_signal.write(PIN_OFF);
     drl.write(PIN_OFF);
-    bms_strobe.write(PIN_OFF);
     brake_lights.write(PIN_OFF);
 
     // freeze the event queue
-    queue.break_dispatch();
-
-    // freeze CAN receiver thread by blocking this function call
     while(true) {ThisThread::sleep_for(0xFFFFFFFFms);}
 }
 
@@ -272,6 +270,13 @@ void PowerCANInterface::handle(BPSPackInformation *can_struct) {
     discharge_relay_status = can_struct->discharge_relay_status;
     charge_relay_status = can_struct->charge_relay_status;
     pack_voltage = can_struct->pack_voltage / 100.0;
+}
+
+void PowerCANInterface::handle(ChargingMode *can_struct) {
+    if (can_struct->charging_mode_enable) { // should always be true
+        log_info("Entering charging mode");
+        queue.call(enter_charging_mode);
+    }
 }
 
 // Message_forwarder is called whenever the MotorControllerCANInterface gets a CAN message.
