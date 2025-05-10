@@ -9,7 +9,6 @@
 #define CONT_12_LOGIC_THRESHOLD     0.1f // below is logic low, above is logic high
 #define HAL_EFFECT_SENSOR_SCALE     (5.0f / 3.28f) // used to scale voltages up to 5V
 #define PACK_VOLT_PCT               0.95f // precharge can proceed once RC voltage exceeds this percent of pack voltage
-#define PRECHARGE_WAIT              3s
 
 
 // checks if a fault occured
@@ -37,13 +36,10 @@ void motor_precharge(){
     // start motor precharge
     motor_precharge_en.write(1);
 
-    // invert rc voltage
-    // while (pack_voltage == 0 && rc_voltage_motor.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
-    //     ThisThread::sleep_for(SLEEP_TICK);
-    //     fault_trap();
-    // }
-
-    ThisThread::sleep_for(PRECHARGE_WAIT);
+    while (pack_voltage == 0 || rc_voltage_motor.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
+        ThisThread::sleep_for(SLEEP_TICK);
+        fault_trap();
+    }
 
     discharge_en.write(1);
 
@@ -77,12 +73,10 @@ void mppt_precharge(){
     // start motor precharge
     mppt_precharge_en.write(1);
 
-    // while (pack_voltage == 0 && rc_voltage_battery.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
-    //     ThisThread::sleep_for(SLEEP_TICK);
-    //     fault_trap();
-    // }
-
-    ThisThread::sleep_for(PRECHARGE_WAIT);
+    while (pack_voltage == 0 || rc_voltage_battery.read_voltage() * HAL_EFFECT_SENSOR_SCALE < PACK_VOLT_PCT * pack_voltage) {
+        ThisThread::sleep_for(SLEEP_TICK);
+        fault_trap();
+    }
 
     charge_en.write(1);
 
