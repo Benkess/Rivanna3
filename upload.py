@@ -10,7 +10,7 @@ BOARD_MAP = {
     "battery": "cmake_build/UVA_SOLAR_CAR/develop/GCC_ARM/BatteryBoard/BatteryBoard.bin",
     "motor": "cmake_build/UVA_SOLAR_CAR/develop/GCC_ARM/Motor/Motor.bin",
     "power": "cmake_build/POWER_BOARD/develop/GCC_ARM/PowerBoard/PowerBoard.bin",
-    "telemetry": "cmake_build/POWER_BOARD/develop/GCC_ARM/TelemetryBoard/TelemetryBoard.bin",}
+    "telemetry": "cmake_build/TELEMETRY_BOARD/develop/GCC_ARM/TelemetryBoard/TelemetryBoard.bin",}
 
 HIL_BOARD_MAP = {} # board path map specific to the HIL testing system server
 
